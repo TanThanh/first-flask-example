@@ -1,8 +1,10 @@
 #all the import
+
 import os
 from sqlite3 import dbapi2 as sqlite3
 from flask import Flask, request, session, g, redirect, url_for, abort, \
 	 render_template, flash
+
 #tao ung dung !
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -15,6 +17,7 @@ app.config.update(dict(
     USERNAME='admin',
     PASSWORD='default'
 ))
+
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
 
@@ -46,7 +49,7 @@ def init_db():
 @app.route('/')
 def show_entries():
 	db = get_db()
-	cur = db.execute('Chon tieu de, chu tu entries order by od desc')
+	cur = db.execute('select title, text from entries order by id desc')
 	entries = cur.fetchall()
 	return render_template('show_entries.html', entries = entries)
 
@@ -55,7 +58,7 @@ def add_entry():
 	if not session.get('logged_in'):
 		abort(401)
 	db = get_db()
-	db.execute('Nhap vao bai viet (tieu de, chu) values (?, ?)', [request.form['title'], request.form['text']])
+	db.execute('insert into entries (title, text) values (?, ?)', [request.form['title'], request.form['text']])
 	db.commit()
 
 	flash ('Bai viet moi da duoc tao thanh cong')
@@ -65,7 +68,7 @@ def add_entry():
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
 	error = None
-	if request.methods == 'POST':
+	if request.method == 'POST':
 		if request.form ['username'] != app.config['USERNAME']:
 			error = 'Invalid username'
 		elif request.form['password'] != app.config['PASSWORD']:
